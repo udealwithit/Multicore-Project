@@ -67,7 +67,10 @@ int main(int argc, char* argv[])
         int my_end = (my_rank == num_threads - 1) ? rows : my_start + size_of_work;
 
         for(int i=my_start; i<my_end; i++) {
+            double start = omp_get_wtime();
             result_vect[i] = vector_mult(columns, matrix[i], vector);
+            double end = omp_get_wtime();
+            fprintf(stderr,"%d:(%d):%f\n",my_rank,omp_in_parallel(),(end-start));
         }
     }
 
