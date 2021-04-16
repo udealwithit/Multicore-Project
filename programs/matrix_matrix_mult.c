@@ -65,10 +65,15 @@ int main(int argc, char* argv[])
 
     #pragma omp parallel for num_threads(num_threads)
     for(int i=0; i<total_multiplications; i++) {
+        int my_rank = omp_get_thread_num();
+        double start = omp_get_wtime();
+        
         int r = i/columns2;
         int c = i%columns2;
-
         result_mat[r][c] = mat_mul_row_col(columns, r, c, matrix1, matrix2);
+
+        double end = omp_get_wtime();
+        fprintf(stderr, "%d:(parallelfor):%lf\n", my_rank, end - start);
     }
 
     printf("Result Matrix: \n");
