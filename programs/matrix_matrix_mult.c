@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
         result_mat[r][c] = mat_mul_row_col(columns, r, c, matrix1, matrix2);
 
         double end = omp_get_wtime();
-        fprintf(stderr, "%d:(parallelfor):%lf\n", my_rank, end - start);
+        fprintf(stderr, "%d:parallelfor:%lf\n", my_rank, end - start);
     }
 
     printf("Result Matrix: \n");
