@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
             double start = omp_get_wtime();
             result_vect[i] = vector_mult(columns, matrix[i], vector);
             double end = omp_get_wtime();
-            fprintf(stderr,"%d:parallel:%f\n",my_rank,(end-start));
+            fprintf(stderr,"%d:parallel:%lf\n",my_rank,(end-start));
         }
     }
 
