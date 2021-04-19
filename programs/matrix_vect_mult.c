@@ -41,10 +41,14 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    double matrix[rows][columns];
-    double vector[columns];
-    double result_vect[rows];
-
+    double **matrix = calloc(rows, sizeof(double*));
+    for(int i=0; i<rows; i++) {
+        matrix[i] = calloc(columns, sizeof(double));
+    }
+    
+    double *vector = calloc(columns, sizeof(double));
+    double *result_vect = calloc(rows,sizeof(double));
+    
     for(int i=0; i<rows; i++) {
         for(int j=0; j<columns; j++) {
             fscanf(mat_file, "%lf", &matrix[i][j]);
@@ -54,6 +58,9 @@ int main(int argc, char* argv[])
     for(int i=0; i<columns; i++) {
         fscanf(vect_file, "%lf", &vector[i]);
     }
+
+    fclose(mat_file);
+    fclose(vect_file);    
 
     // Calculate the work for each thread
     // For e.g if we have 5 rows and 5 threads each thread will
@@ -74,11 +81,11 @@ int main(int argc, char* argv[])
         }
     }
 
-    printf("Result vector is: \n");
-    for(int i=0; i<rows; i++) {
-        printf("%lf ", result_vect[i]);
-    }
-    printf("\n");
+    //printf("Result vector is: \n");
+    //for(int i=0; i<rows; i++) {
+    //    printf("%lf ", result_vect[i]);
+    //}
+    printf("Done multiplying");
 
     return 0;
 }

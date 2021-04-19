@@ -1,11 +1,22 @@
 from collections import defaultdict
-prof_file = open("build/prof", "r")
+import json
 
-timing_info = defaultdict(lambda: defaultdict(float))
-lines = prof_file.readlines()
-for line in lines:
-    line = line.strip()
-    arr = line.split(':')
-    timing_info[arr[0]][arr[1]] += float(arr[2])
+class Profile_parser:
+    def __init__(self):
+        self.timing_info = defaultdict(lambda: defaultdict(float))
+    
+    def parse(self, prof_file):
+        lines = prof_file.readlines()
+        for line in lines:
+            line = line.strip()
+            keys = line.split(':')
+            sections = keys[1].split('-')
 
-print(timing_info)
+            if (len(sections) > 1):
+                self.timing_info[keys[0]][sections[0]+"-total"] += float(keys[2])
+            self.timing_info[keys[0]][keys[1]] += float(keys[2])
+        
+        json_file = open("build/json_dump.json", "w")
+        json.dump(self.timing_info, json_file)
+        prof_file.close()
+        json_file.close()
