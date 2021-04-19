@@ -25,7 +25,7 @@ int isFull(int size){
 }
 
 void generateRandomFile(int elem,int thread_num,int request_per_thread){
-    printf("GenerateRadnom");
+    // printf("GenerateRadnom");
     char filename[20];
     snprintf(filename,20,"RandNum_%d_%d",thread_num,request_per_thread);
     FILE* rand_file = fopen(filename, "w");
@@ -36,11 +36,11 @@ void generateRandomFile(int elem,int thread_num,int request_per_thread){
 }
 
 int enQueue(int value,int *items, int size) {
-    printf("ENQUEUE\n");
-    for(int i=0;i<size;i++){
-        printf("%d ",items[i]);
-    }
-    printf("\n");
+    // printf("ENQUEUE\n");
+    // for(int i=0;i<size;i++){
+    //     printf("%d ",items[i]);
+    // }
+    // printf("\n");
     if (rear == size - 1){
         return -1;
     }
@@ -54,11 +54,11 @@ int enQueue(int value,int *items, int size) {
 }
 
 int deQueue(int *items) {
-    printf("DEQUEUE\n");
-    for(int i=0;i<3;i++){
-        printf("%d ",items[i]);
-    }
-    printf("\n");
+    // printf("DEQUEUE\n");
+    // for(int i=0;i<3;i++){
+    //     printf("%d ",items[i]);
+    // }
+    // printf("\n");
     if (front == -1)
     {
         return -1;
@@ -74,15 +74,20 @@ int deQueue(int *items) {
 }
 
 void producer(int *items,int count, int total_elem,int size){
-    printf("PRCOUNT %d %d",count,total_elem);
+    // printf("PRCOUNT %d %d",count,total_elem);
     while(count<total_elem){
         int val = 50 + rand() %1000;
         int elem = -1;
+        double start = omp_get_wtime();
         #pragma omp critical
         {
+            double end = omp_get_wtime();
+            fprintf(stderr,"0:critical wait:%lf\n",(end-start));
             if(isFull(size) != 1){
                 elem = enQueue(val,items,size);
             }
+            end = omp_get_wtime();
+            fprintf(stderr,"0:critical:%lf\n",(end-start));
         }
         if(elem != -1){
             count+= 1;
@@ -94,15 +99,23 @@ void producer(int *items,int count, int total_elem,int size){
 void consumer(int *items,int count,int total_elem,int thread_num,int *request_per_thread){
     while(count<total_elem){
         int elem = -1;
+        double start = omp_get_wtime();
         #pragma omp critical
         {
+            double end = omp_get_wtime();
+            fprintf(stderr,"%d:critical wait:%lf\n",thread_num,(end-start));
             if(isEmpty() != 1){
                 elem = deQueue(items);
             }
+            end = omp_get_wtime();
+            fprintf(stderr,"%d:critical:%lf\n",thread_num,(end-start));
         }
         if(elem != -1){
             *request_per_thread += 1;
+            start = omp_get_wtime();
             generateRandomFile(elem,thread_num,*request_per_thread);
+            double end = omp_get_wtime();
+            fprintf(stderr,"%d:generateRandomFile:%lf\n",thread_num,(end-start));
         }
         else{
             sleep(2);
@@ -135,14 +148,19 @@ int main(int argc, char* argv[])
         count = 0;
         request_per_thread = 0;
         int my_thread_num = omp_get_thread_num();
-        printf("ThreadNUm %d\n",my_thread_num);
+        // printf("ThreadNUm %d\n",my_thread_num);
+
+        double start = omp_get_wtime();
         if(my_thread_num != 0){
+            // printf("CONSUMER\n");
             consumer(items,count,total_elements,my_thread_num,&request_per_thread);
         }
         else{
-            printf("PRODUCER\n");
+            // printf("PRODUCER\n");
             producer(items,count,total_elements,size);
         }
+        double end = omp_get_wtime();
+        fprintf(stderr,"%d:parallel:%lf\n",my_thread_num,(end-start));
     }
 
 }
