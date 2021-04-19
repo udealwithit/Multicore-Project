@@ -82,7 +82,7 @@ void producer(int *items,int count, int total_elem,int size){
         #pragma omp critical
         {
             double end = omp_get_wtime();
-            fprintf(stderr,"0:critical wait:%lf\n",(end-start));
+            fprintf(stderr,"0:critical_wait:%lf\n",(end-start));
             if(isFull(size) != 1){
                 elem = enQueue(val,items,size);
             }
@@ -103,19 +103,19 @@ void consumer(int *items,int count,int total_elem,int thread_num,int *request_pe
         #pragma omp critical
         {
             double end = omp_get_wtime();
-            fprintf(stderr,"%d:critical wait:%lf\n",thread_num,(end-start));
+            fprintf(stderr,"%d:critical_wait-%d:%lf\n",thread_num,*request_per_thread,(end-start));
             if(isEmpty() != 1){
                 elem = deQueue(items);
             }
             end = omp_get_wtime();
-            fprintf(stderr,"%d:critical:%lf\n",thread_num,(end-start));
+            fprintf(stderr,"%d:critical-%d:%lf\n",thread_num,*request_per_thread,(end-start));
         }
         if(elem != -1){
             *request_per_thread += 1;
             start = omp_get_wtime();
             generateRandomFile(elem,thread_num,*request_per_thread);
             double end = omp_get_wtime();
-            fprintf(stderr,"%d:generateRandomFile:%lf\n",thread_num,(end-start));
+            fprintf(stderr,"%d:generate_random_file-%d:%lf\n",thread_num,*request_per_thread,(end-start));
         }
         else{
             sleep(2);
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     /*
      * Program takes as input rows, columns, num_threads, matrix_file and vector_file
     */
-    if (argc != 5) {
+    if (argc != 4) {
         printf("Wrong inputs provided... exiting");
         return 1;
     }
@@ -139,9 +139,9 @@ int main(int argc, char* argv[])
     int *items = calloc(atoi(argv[1]),sizeof(int));
     int size = atoi(argv[1]);
     int consumer_threads = atoi(argv[2]);
-    int producer_threads = atoi(argv[3]);
+    int producer_threads = 1;
     int total_threads = consumer_threads+producer_threads;
-    int total_elements = atoi(argv[4]);
+    int total_elements = atoi(argv[3]);
     int count,request_per_thread;
     #pragma omp parallel shared(items,front,rear,size,total_elements) private(count,request_per_thread) num_threads(total_threads)
     {
