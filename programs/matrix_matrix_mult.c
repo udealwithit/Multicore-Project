@@ -11,7 +11,7 @@ int rows = 0;
 int columns = 0;
 int columns2 = 0;
 
-double mat_mul_row_col(int size, int row, int col, double mat1[][columns], double mat2[][columns2]) {
+double mat_mul_row_col(int size, int row, int col, double **mat1, double **mat2) {
     /*
      * Function to multiply one row of matrix with one column of another matrix
      * This will be used in matrix multiplication where each thread
@@ -45,9 +45,19 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    double matrix1[rows][columns];
-    double matrix2[columns][columns2];
-    double result_mat[rows][columns2];
+    double **matrix1 = calloc(rows, sizeof(double*));//[rows][columns];
+    double **matrix2 = calloc(columns, sizeof(double*));//[columns][columns2];
+    double **result_mat = calloc(rows, sizeof(double*));//[rows][columns2];
+
+    for(int i=0; i<rows; i++) {
+        matrix1[i] = calloc(columns, sizeof(double));
+    }
+    for(int i=0; i<columns; i++) {
+        matrix2[i] = calloc(columns2, sizeof(double));
+    }
+    for(int i=0; i<rows; i++) {
+        result_mat[i] = calloc(columns2, sizeof(double));
+    }
 
     int total_multiplications = rows * columns2;
 
@@ -63,6 +73,9 @@ int main(int argc, char* argv[])
         }
     }
 
+    fclose(mat_file);
+    fclose(mat_file2);
+
     #pragma omp parallel for num_threads(num_threads)
     for(int i=0; i<total_multiplications; i++) {
         int my_rank = omp_get_thread_num();
@@ -76,11 +89,12 @@ int main(int argc, char* argv[])
         fprintf(stderr, "%d:parallelfor:%lf\n", my_rank, end - start);
     }
 
-    printf("Result Matrix: \n");
-    for(int i=0; i<rows; i++) {
-        for(int j=0; j<columns2; j++) {
-            printf("%lf ", result_mat[i][j]);
-        }
-        printf("\n");
-    }
+    //printf("Result Matrix: \n");
+    //for(int i=0; i<rows; i++) {
+    //    for(int j=0; j<columns2; j++) {
+    //        printf("%lf ", result_mat[i][j]);
+    //    }
+    //    printf("\n");
+    //}
+    printf("Done Multiplying\n");
 }
