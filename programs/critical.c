@@ -82,12 +82,12 @@ void producer(int *items,int count, int total_elem,int size){
         #pragma omp critical
         {
             double end = omp_get_wtime();
-            fprintf(stderr,"0:critical_wait:%lf\n",(end-start));
+            fprintf(stderr,"0:critical_wait-%d:%lf\n",count, (end-start));
             if(isFull(size) != 1){
                 elem = enQueue(val,items,size);
             }
             end = omp_get_wtime();
-            fprintf(stderr,"0:critical:%lf\n",(end-start));
+            fprintf(stderr,"0:critical-%d:%lf\n",count, (end-start));
         }
         if(elem != -1){
             count+= 1;

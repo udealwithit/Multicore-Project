@@ -14,6 +14,7 @@ class Profile_parser:
 
             if (len(sections) > 1):
                 self.timing_info[keys[0]][sections[0]+"-total"] += float(keys[2])
+                self.timing_info[keys[0]][sections[0]+"-count"] += 1
             self.timing_info[keys[0]][keys[1]] += float(keys[2])
         
         json_file = open("build/json_dump.json", "w")
