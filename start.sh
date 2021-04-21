@@ -19,7 +19,9 @@ clear
 case $program in
     1)
         echo "Matrix Vector Multiplication"
-        gcc -fopenmp -Wall -o "build/temp" "programs/matrix_vect_mult.c"
+        
+        # gcc 
+        clang -Xpreprocessor -fopenmp -Wall -o "build/temp" "programs/matrix_vect_mult.c" -lomp
         echo "Enter number of rows of Matrix"
         read rows
         arguments+=("$rows")
@@ -72,7 +74,14 @@ case $program in
         arguments+=("arr")
         ;;
     5)
-        gcc -fopenmp -Wall -o "build/temp" "programs/prime.c"
+        clang -Xpreprocessor -fopenmp -Wall -o "build/temp" "programs/prime.c" -lomp
+        echo "Enter till which number to find the primes"
+        read lastNumber
+        arguments+=("$lastNumber")
+
+        echo "Enter number of threads to run"
+        read threads
+        arguments+=("$threads")
         ;;
 esac
 
@@ -92,8 +101,9 @@ read choice
 
 if [ $choice == 1 ]
 then
-    valgrind --tool=massif --stacks=yes --time-unit=ms --log-file="valgrind_log" ./temp "${@:2}" > /dev/null 2> /dev/null
-    ms_print massif.out.* > massif_log
+    echo "h"
+    # valgrind --tool=massif --stacks=yes --time-unit=ms --log-file="valgrind_log" ./temp "${@:2}" > /dev/null 2> /dev/null
+    # ms_print massif.out.* > massif_log
 else
     valgrind --tool=callgrind --simulate-cache=yes --log-file="valgrind_log" ./temp "${@:2}" > /dev/null 2> /dev/null
     callgrind_annotate --auto=yes callgrind.out.* >callgrind_log
