@@ -39,10 +39,12 @@ int main(int argc, char* argv[])
         int my_rank = omp_get_thread_num();
         double start = omp_get_wtime();
         if(list_nums[i] == number) {
+
             double start_atm = omp_get_wtime();
             #pragma omp atomic
             count += 1;
             double end_atm = omp_get_wtime();
+            
             fprintf(stderr, "%d:atomic:%lf\n", my_rank, (end_atm - start_atm));
         }
         double end = omp_get_wtime();
