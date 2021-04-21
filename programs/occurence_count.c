@@ -7,32 +7,8 @@
  * Uses openmp to parallelize the application
 */
 
-int main(int argc, char* argv[])
-{
-    /*
-     * Program takes as input file, size, the number to search and num_threads
-    */
-    if (argc != 5) {
-        printf("Wrong inputs provided... exiting");
-        return 1;
-    }
-
-    FILE* input_file = fopen(argv[1], "r");
-    int size = atoi(argv[2]);
-    int number = atoi(argv[3]);
-    int num_threads = atoi(argv[4]);
+int count_occurence(int* list_nums, int size, int number, int num_threads) {
     int count = 0;
-
-    if (input_file == NULL) {
-        printf("Error opening given file... exiting");
-        return 1;
-    }
-
-    int list_nums[size];
-
-    for(int i=0; i<size; i++) {
-        fscanf(input_file, "%d ", &list_nums[i]);
-    }
 
     #pragma omp parallel for num_threads(num_threads)
     for(int i=0; i<size; i++) {
@@ -50,6 +26,37 @@ int main(int argc, char* argv[])
         double end = omp_get_wtime();
         fprintf(stderr, "%d:parallelfor:%lf\n", my_rank, (end - start));
     }
+    
+    return count;
+}
+
+int main(int argc, char* argv[])
+{
+    /*
+     * Program takes as input size, the number to search, num_threads and file
+    */
+    if (argc != 5) {
+        printf("Wrong inputs provided... exiting");
+        return 1;
+    }
+
+    int size = atoi(argv[1]);
+    int number = atoi(argv[2]);
+    int num_threads = atoi(argv[3]);
+    FILE* input_file = fopen(argv[4], "r");
+    
+    if (input_file == NULL) {
+        printf("Error opening given file... exiting");
+        return 1;
+    }
+
+    int list_nums[size];
+
+    for(int i=0; i<size; i++) {
+        fscanf(input_file, "%d ", &list_nums[i]);
+    }
+
+    int count = count_occurence(list_nums, size, number, num_threads);
 
     printf("Number of times %d occured is %d\n", number, count);
 }
