@@ -69,16 +69,17 @@ int main(int argc, char* argv[])
 
     #pragma omp parallel num_threads(num_threads)
     {
+        double start = omp_get_wtime();
+        
         int my_rank = omp_get_thread_num();
         int my_start = my_rank * size_of_work;
         int my_end = (my_rank == num_threads - 1) ? rows : my_start + size_of_work;
-
         for(int i=my_start; i<my_end; i++) {
-            double start = omp_get_wtime();
             result_vect[i] = vector_mult(columns, matrix[i], vector);
-            double end = omp_get_wtime();
-            fprintf(stderr,"%d:parallel:%lf\n",my_rank,(end-start));
         }
+        
+        double end = omp_get_wtime();
+        fprintf(stderr,"%d:parallel:%lf\n",my_rank,(end-start));
     }
 
     printf("Result vector is: \n");

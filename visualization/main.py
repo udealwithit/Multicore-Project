@@ -3,7 +3,7 @@ from visualizer import Visualizer
 
 prof_file = open("build/prof", "r")
 parser = Profile_parser()
-parser.parse(prof_file)
+sections = parser.parse(prof_file)
 prof_file.close()
 
 massif_file = None
@@ -27,5 +27,6 @@ if (cache_file is not None):
     parser.cache_parse(cache_file)
     cache_file.close()
 
+print(sections)
 visualizer = Visualizer()
-visualizer.visualise()
+visualizer.visualise(sections)

@@ -9,20 +9,23 @@ class Profile_parser:
     
     def parse(self, prof_file):
         lines = prof_file.readlines()
+        sections = set()
         for line in lines:
             line = line.strip()
             keys = line.split(':')
-            sections = keys[1].split('-')
-
-            if (len(sections) > 1):
-                self.timing_info[keys[0]][sections[0]+"-total"] += float(keys[2])
-                self.timing_info[keys[0]][sections[0]+"-count"] += 1
+            section = keys[1].split('-')
+            sections.add(section[0])
+            if (len(section) > 1):
+                self.timing_info[keys[0]][section[0]+"-total"] += float(keys[2])
+                self.timing_info[keys[0]][section[0]+"-count"] += 1
             self.timing_info[keys[0]][keys[1]] += float(keys[2])
+            self.timing_info[keys[0]][section[0]+"_tcount"] += 1
         
         json_file = open("build/json_dump.json", "w")
         json.dump(self.timing_info, json_file)
         prof_file.close()
         json_file.close()
+        return list(sections)
 
     def massif_parse(self, massif_file):
         lines = massif_file.readlines()
@@ -60,9 +63,9 @@ class Profile_parser:
             else:
                 line.strip()
             
-                if "PROGRAM TOTALS" in line or "???:" in line: 
+                if "PROGRAM TOTALS" in line or "build/temp" in line: 
                     values = line.split()
-                    key = values[10] if "PROGRAM" in values[9] else values[9][4:]
+                    key = values[9]+values[10][:-2] if "PROGRAM" in values[9] else values[9][4:]
                     f = lambda x: 0 if x == "." else int(x.replace(',',''))
                     self.cache_info[key] = {
                                                     "Instructions": f(values[0]),

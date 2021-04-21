@@ -24,10 +24,12 @@ class Visualizer:
         except:
             pass
 
-    def visualise(self):
-        self.per_thread_parallel()
-        self.per_thread_parallel_for()
-        self.per_thread_atomic()
+    def visualise(self,sections):
+        for section in sections:
+            self.per_thread(section)
+        # self.per_thread_parallel()
+        # self.per_thread_parallel_for()
+        # self.per_thread_atomic()
         self.per_thread_wait_time()
         self.per_thread_critical_time()
         
@@ -37,48 +39,73 @@ class Visualizer:
         if self.massif_info is not None:
             self.massif_visualise()
 
-    def per_thread_parallel(self):
+    def per_thread(self,section):
         threads = []
         parallel_times = []
+        thread_counts = []
+        checkForZero = True
         for key in self.timing_info:
-            if "parallel" in self.timing_info[key]:
+            if section in self.timing_info[key]:
                 threads.append(key)
-                parallel_times.append(self.timing_info[key]["parallel"])
+                if self.timing_info[key][section] != 0:
+                    checkForZero = False
+                thread_counts.append(self.timing_info[key][section+"_tcount"])
+                parallel_times.append(self.timing_info[key][section])
         if (threads):
-            plt.bar(threads, parallel_times)
-            plt.xlabel("Thread Id")
-            plt.ylabel("Time in seconds")
-            plt.title("Time per thread in parallel region")
-            plt.savefig("output/per_thread_parallel.png")
-
-    def per_thread_parallel_for(self):
-        threads = []
-        parallel_times = []
-        for key in self.timing_info:
-            if "parallelfor" in self.timing_info[key]:
-                threads.append(key)
-                parallel_times.append(self.timing_info[key]["parallelfor"])
-        
-        if (threads):
-            plt.bar(threads, parallel_times)
-            plt.xlabel("Thread Id")
-            plt.ylabel("Time in seconds")
-            plt.title("Time per thread in parallel for region")
-            plt.savefig("output/per_thread_parallel_for.png")
+            fig,ax = plt.subplots()
+            if checkForZero:
+                ax.bar(threads, thread_counts)
+                ax.set_ylabel("Number of times thread executed")
+                ax.set_title("Execution count per thread in " + section + " region")
+            else:
+                ax.bar(threads, parallel_times)
+                ax.set_ylabel("Time in seconds")
+                ax.set_title("Time per thread in " + section + " region")
+            ax.set_xlabel("Thread Id")
+            fig.savefig("output/per_thread_"+section+".png")
     
-    def per_thread_atomic(self):
-        threads = []
-        parallel_times = []
-        for key in self.timing_info:
-            if "atomic" in self.timing_info[key]:
-                threads.append(key)
-                parallel_times.append(self.timing_info[key]["atomic"])
-        if (threads):
-            plt.bar(threads, parallel_times)
-            plt.xlabel("Thread Id")
-            plt.ylabel("Time in seconds")
-            plt.title("Time per thread in atomic region")
-            plt.savefig("output/per_thread_atomic.png")
+    # def per_thread_parallel(self):
+    #     threads = []
+    #     parallel_times = []
+    #     for key in self.timing_info:
+    #         if "parallel" in self.timing_info[key]:
+    #             threads.append(key)
+    #             parallel_times.append(self.timing_info[key]["parallel"])
+    #     if (threads):
+    #         plt.bar(threads, parallel_times)
+    #         plt.xlabel("Thread Id")
+    #         plt.ylabel("Time in seconds")
+    #         plt.title("Time per thread in parallel region")
+    #         plt.savefig("output/per_thread_parallel.png")
+
+    # def per_thread_parallel_for(self):
+    #     threads = []
+    #     parallel_times = []
+    #     for key in self.timing_info:
+    #         if "parallelfor" in self.timing_info[key]:
+    #             threads.append(key)
+    #             parallel_times.append(self.timing_info[key]["parallelfor"])
+        
+    #     if (threads):
+    #         plt.bar(threads, parallel_times)
+    #         plt.xlabel("Thread Id")
+    #         plt.ylabel("Time in seconds")
+    #         plt.title("Time per thread in parallel for region")
+    #         plt.savefig("output/per_thread_parallel_for.png")
+    
+    # def per_thread_atomic(self):
+    #     threads = []
+    #     parallel_times = []
+    #     for key in self.timing_info:
+    #         if "atomic" in self.timing_info[key]:
+    #             threads.append(key)
+    #             parallel_times.append(self.timing_info[key]["atomic"])
+    #     if (threads):
+    #         plt.bar(threads, parallel_times)
+    #         plt.xlabel("Thread Id")
+    #         plt.ylabel("Time in seconds")
+    #         plt.title("Time per thread in atomic region")
+    #         plt.savefig("output/per_thread_atomic.png")
     
     def per_thread_wait_time(self):
         threads = []
@@ -128,13 +155,22 @@ class Visualizer:
             heap_mem.append(self.massif_info[key]['heap']/float(1024))
             stack_mem.append(self.massif_info[key]['stack']/float(1024))
 
-        plt.plot(time,total_mem,label="Total Memory Usage")
-        plt.plot(time,heap_mem,label="Heap Usage")
-        plt.plot(time,stack_mem,label="Stack Usage")
-        plt.xlabel('Time in ms')
-        plt.ylabel('Memory in KB')
-        plt.legend()
-        plt.savefig("output/massif_visualise.png")
+        fig,axs = plt.subplots(2,2)
+        
+        axs[0][0].plot(time,total_mem,label="Total Memory Usage")
+        axs[0][0].set_xlabel('Time in ms')
+        axs[0][0].set_ylabel('Memory in KB')
+        
+        axs[0][1].plot(time,heap_mem,label="Heap Usage")
+        axs[0][1].set_xlabel('Time in ms')
+        axs[0][1].set_ylabel('Memory in KB')
+        
+        axs[1][0].plot(time,stack_mem,label="Stack Usage")
+        axs[1][0].set_xlabel('Time in ms')
+        axs[1][0].set_ylabel('Memory in KB')
+        
+        # plt.legend()
+        fig.savefig("output/massif_visualise.png")
 
     def cache_visualise(self):
         data = []
@@ -159,4 +195,4 @@ class Visualizer:
         the_table.auto_set_font_size(False)
         the_table.set_fontsize(5)
         fig.tight_layout()
-        plt.savefig("output/cache_visualise.png")
+        fig.savefig("output/cache_visualise.png")
