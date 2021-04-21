@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
      * Program takes as input rows, columns, num_threads, matrix_file and vector_file
     */
     if (argc != 6) {
-        printf("Wrong inputs provided... exiting");
+        printf("Wrong inputs provided... exiting\n");
         return 1;
     }
 
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     FILE* vect_file = fopen(argv[5], "r");
 
     if (mat_file==NULL || vect_file==NULL) {
-        printf("Error opening given file... exiting");
+        printf("Error opening given file... exiting\n");
         return 1;
     }
 
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     //for(int i=0; i<rows; i++) {
     //    printf("%lf ", result_vect[i]);
     //}
-    printf("Done multiplying");
+    printf("Done multiplying\n");
 
     return 0;
 }

@@ -1,18 +1,41 @@
 import json
 import matplotlib.pyplot as plt
+import pandas as pd
+import os
 
 class Visualizer:
     def __init__(self):
         json_file = open('build/json_dump.json','r')
         self.timing_info = json.load(json_file)
         json_file.close()
-    
+
+        self.massif_info = None
+        self.cache_info = None
+        
+        try:
+            with open('build/massif_dump.json','r') as massif_file:
+                self.massif_info = json.load(massif_file)
+        except:
+            pass
+
+        try:
+            with open('build/cache_dump.json','r') as cache_file:
+                self.cache_info = json.load(cache_file)
+        except:
+            pass
+
     def visualise(self):
         self.per_thread_parallel()
         self.per_thread_parallel_for()
         self.per_thread_wait_time()
         self.per_thread_critical_time()
         
+        if self.cache_info is not None:
+            self.cache_visualise()
+        
+        if self.massif_info is not None:
+            self.massif_visualise()
+
     def per_thread_parallel(self):
         threads = []
         parallel_times = []
@@ -25,7 +48,7 @@ class Visualizer:
             plt.xlabel("Thread Id")
             plt.ylabel("Time in seconds")
             plt.title("Time per thread in parallel region")
-            plt.show()
+            plt.savefig("output/per_thread_parallel.png")
 
     def per_thread_parallel_for(self):
         threads = []
@@ -40,7 +63,7 @@ class Visualizer:
             plt.xlabel("Thread Id")
             plt.ylabel("Time in seconds")
             plt.title("Time per thread in parallel for region")
-            plt.show()
+            plt.savefig("output/per_thread_parallel_for.png")
     
     def per_thread_wait_time(self):
         threads = []
@@ -58,7 +81,7 @@ class Visualizer:
             plt.xlabel("Thread Id")
             plt.ylabel("Avg Wait Time in seconds")
             plt.title("Avg Wait Time per thread in for critical region")
-            plt.show()
+            plt.savefig("output/per_thread_wait_time.png")
 
     def per_thread_critical_time(self):
         threads = []
@@ -76,4 +99,49 @@ class Visualizer:
             plt.xlabel("Thread Id")
             plt.ylabel("Avg Wait Time in seconds")
             plt.title("Avg Wait Time per thread in for critical region")
-            plt.show()
+            plt.savefig("output/per_thread_critical_time.png")
+
+    def massif_visualise(self):
+        time = []
+        total_mem = []
+        heap_mem = []
+        stack_mem = []
+
+        for key in self.massif_info:
+            time.append(self.massif_info[key]['time'])
+            total_mem.append(self.massif_info[key]['total']/float(1024))
+            heap_mem.append(self.massif_info[key]['heap']/float(1024))
+            stack_mem.append(self.massif_info[key]['stack']/float(1024))
+
+        plt.plot(time,total_mem,label="Total Memory Usage")
+        plt.plot(time,heap_mem,label="Heap Usage")
+        plt.plot(time,stack_mem,label="Stack Usage")
+        plt.xlabel('Time in ms')
+        plt.ylabel('Memory in KB')
+        plt.legend()
+        plt.savefig("output/massif_visualise.png")
+
+    def cache_visualise(self):
+        data = []
+        columns = ["Function_Name"]
+        populate_columns = False
+        for key in self.cache_info:
+            val = [key]
+            for key2 in self.cache_info[key]:
+                if (not populate_columns):
+                    columns.append(key2)
+                val.append(self.cache_info[key][key2])
+            data.append(val)
+            if (not populate_columns):        
+                populate_columns = True
+        
+        dataframe = pd.DataFrame(data,columns=columns)
+        fig, ax = plt.subplots() 
+        ax.axis('off')
+        ax.axis('tight')
+
+        the_table = ax.table(cellText=dataframe.values, colLabels=dataframe.columns, loc='center')
+        the_table.auto_set_font_size(False)
+        the_table.set_fontsize(5)
+        fig.tight_layout()
+        plt.savefig("output/cache_visualise.png")
