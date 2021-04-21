@@ -6,12 +6,12 @@ mkdir build
 mkdir output
 gcc -fopenmp -Wall -o "build/temp" "programs/$1"
 cd build
-
+clear
 echo "1. Run Massif tool (This takes time)"
 echo "2. Run Cachegrind tool"
 read choice
 
-./temp "${@:2}" 2> prof
+./temp "${@:2}" > prog_out 2> prof
 
 if [ $choice == 1 ]
 then

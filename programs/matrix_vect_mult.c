@@ -81,11 +81,10 @@ int main(int argc, char* argv[])
         }
     }
 
-    //printf("Result vector is: \n");
-    //for(int i=0; i<rows; i++) {
-    //    printf("%lf ", result_vect[i]);
-    //}
-    printf("Done multiplying\n");
+    printf("Result vector is: \n");
+    for(int i=0; i<rows; i++) {
+        printf("%lf ", result_vect[i]);
+    }
 
     return 0;
 }

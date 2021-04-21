@@ -27,6 +27,7 @@ class Visualizer:
     def visualise(self):
         self.per_thread_parallel()
         self.per_thread_parallel_for()
+        self.per_thread_atomic()
         self.per_thread_wait_time()
         self.per_thread_critical_time()
         
@@ -64,6 +65,20 @@ class Visualizer:
             plt.ylabel("Time in seconds")
             plt.title("Time per thread in parallel for region")
             plt.savefig("output/per_thread_parallel_for.png")
+    
+    def per_thread_atomic(self):
+        threads = []
+        parallel_times = []
+        for key in self.timing_info:
+            if "atomic" in self.timing_info[key]:
+                threads.append(key)
+                parallel_times.append(self.timing_info[key]["atomic"])
+        if (threads):
+            plt.bar(threads, parallel_times)
+            plt.xlabel("Thread Id")
+            plt.ylabel("Time in seconds")
+            plt.title("Time per thread in atomic region")
+            plt.savefig("output/per_thread_atomic.png")
     
     def per_thread_wait_time(self):
         threads = []

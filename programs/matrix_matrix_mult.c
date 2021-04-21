@@ -89,12 +89,11 @@ int main(int argc, char* argv[])
         fprintf(stderr, "%d:parallelfor:%lf\n", my_rank, end - start);
     }
 
-    //printf("Result Matrix: \n");
-    //for(int i=0; i<rows; i++) {
-    //    for(int j=0; j<columns2; j++) {
-    //        printf("%lf ", result_mat[i][j]);
-    //    }
-    //    printf("\n");
-    //}
-    printf("Done Multiplying\n");
+    printf("Result Matrix: \n");
+    for(int i=0; i<rows; i++) {
+        for(int j=0; j<columns2; j++) {
+            printf("%lf ", result_mat[i][j]);
+        }
+        printf("\n");
+    }
 }
