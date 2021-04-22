@@ -83,7 +83,7 @@ case $program in
         arguments+=("arr")
         ;;
     5)
-        gcc -fopenmp -Wall -std=c99 -o "build/temp" "programs/prime.c"
+        gcc -fopenmp -Wall -std=c99 -o "build/temp" "programs/prime.c" -lm
         echo "Enter till which number to find the primes"
         read lastNumber
         arguments+=("$lastNumber")
