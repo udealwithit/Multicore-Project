@@ -1,5 +1,6 @@
 #!/bin/bash
 
+module load gcc-9.2
 rm -rf build
 rm -rf output
 mkdir build
@@ -20,7 +21,7 @@ clear
 case $program in
     1)
         echo "Matrix Vector Multiplication"
-        gcc -fopenmp -Wall -o "build/temp" "programs/matrix_vect_mult.c"
+        gcc -fopenmp -Wall -std=c99 -o "build/temp" "programs/matrix_vect_mult.c"
         echo "Enter number of rows of Matrix"
         read rows
         arguments+=("$rows")
@@ -37,7 +38,7 @@ case $program in
         ;;
     2)
         echo "Matrix Matrix Multiplication"
-        gcc -fopenmp -Wall -o "build/temp" "programs/matrix_matrix_mult.c"
+        gcc -fopenmp -Wall -std=c99 -o "build/temp" "programs/matrix_matrix_mult.c"
         echo "Enter number of rows of 1st Matrix"
         read rows
         arguments+=("$rows")
@@ -56,7 +57,7 @@ case $program in
         arguments+=("mat2")
         ;;
     3)
-        gcc -fopenmp -Wall -o "build/temp" "programs/ProducerConsumer.c"
+        gcc -fopenmp -Wall -std=c99 -o "build/temp" "programs/ProducerConsumer.c"
         echo "Enter the size of the queue"
         read size
         arguments+=("$size")
@@ -68,7 +69,7 @@ case $program in
         arguments+=("$numberofele")
         ;;
     4)
-        gcc -fopenmp -Wall -o "build/temp" "programs/occurence_count.c"
+        gcc -fopenmp -Wall -std=c99 -o "build/temp" "programs/occurence_count.c"
         echo "Enter size of array"
         read size
         arguments+=("$size")
@@ -82,7 +83,7 @@ case $program in
         arguments+=("arr")
         ;;
     5)
-        gcc -fopenmp -Wall -o "build/temp" "programs/prime.c"
+        gcc -fopenmp -Wall -std=c99 -o "build/temp" "programs/prime.c"
         echo "Enter till which number to find the primes"
         read lastNumber
         arguments+=("$lastNumber")
