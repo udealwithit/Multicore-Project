@@ -14,20 +14,18 @@ int eratosthenes(int lastNumber,int numOfThreads)
   omp_set_num_threads(numOfThreads);
 
   #pragma omp parallel for
+  for (int i = 0; i <= memorySize; i++)
   {
-    for (int i = 0; i <= memorySize; i++)
-    {
       double start = omp_get_wtime();
       int my_thread_num = omp_get_thread_num();
       isPrime[i] = 1;
       double end = omp_get_wtime();
       fprintf(stderr,"%d:parallelfor_init:%lf\n",my_thread_num,(end-start));
-    }
   }
 
   #pragma omp parallel for schedule(dynamic)
+  for (int i = 3; i <= lastNumberSqrt; i += 2)
   {
-    for (int i = 3; i <= lastNumberSqrt; i += 2){
       double start = omp_get_wtime();
       int my_thread_num = omp_get_thread_num();
       if (isPrime[i/2])
@@ -35,19 +33,17 @@ int eratosthenes(int lastNumber,int numOfThreads)
           isPrime[j/2] = 0;
       double end = omp_get_wtime();
       fprintf(stderr,"%d:parallelfor_findodd:%lf\n",my_thread_num,(end-start));
-    }
   }
 
   int numOfPrimes = lastNumber >= 2 ? 1 : 0;
   #pragma omp parallel for reduction(+:numOfPrimes)
+  for (int i = 1; i <= memorySize; i++)
   {
-    for (int i = 1; i <= memorySize; i++){
       double start = omp_get_wtime();
       int my_thread_num = omp_get_thread_num();
       numOfPrimes += isPrime[i];
       double end = omp_get_wtime();
       fprintf(stderr,"%d:parallelfor_countprime:%lf\n",my_thread_num,(end-start));
-    }
   }
   return numOfPrimes;
 }
