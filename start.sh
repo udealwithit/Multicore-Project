@@ -14,14 +14,13 @@ echo "5. Find all prime numbers till a given number"
 read program
 
 declare -a arguments=()
+declare -a x=()
 
 clear
 case $program in
     1)
         echo "Matrix Vector Multiplication"
-        
-        # gcc 
-        clang -Xpreprocessor -fopenmp -Wall -o "build/temp" "programs/matrix_vect_mult.c" -lomp
+        gcc -fopenmp -Wall -o "build/temp" "programs/matrix_vect_mult.c"
         echo "Enter number of rows of Matrix"
         read rows
         arguments+=("$rows")
@@ -57,7 +56,16 @@ case $program in
         arguments+=("mat2")
         ;;
     3)
-        gcc -fopenmp -Wall -o "build/temp" "programs/critical.c"
+        gcc -fopenmp -Wall -o "build/temp" "programs/ProducerConsumer.c"
+        echo "Enter the size of the queue"
+        read size
+        arguments+=("$size")
+        echo "Enter the number of consumer threads"
+        read consumer_threads
+        arguments+=("$consumer_threads")
+        echo "Enter the total number of elements to be produced"
+        read numberofele
+        arguments+=("$numberofele")
         ;;
     4)
         gcc -fopenmp -Wall -o "build/temp" "programs/occurence_count.c"
@@ -74,7 +82,7 @@ case $program in
         arguments+=("arr")
         ;;
     5)
-        clang -Xpreprocessor -fopenmp -Wall -o "build/temp" "programs/prime.c" -lomp
+        gcc -fopenmp -Wall -o "build/temp" "programs/prime.c"
         echo "Enter till which number to find the primes"
         read lastNumber
         arguments+=("$lastNumber")
@@ -87,28 +95,39 @@ esac
 
 cd build
 
-# for value in ${arguments[@]}
-# do
-#      echo $value
-# done
-
 clear
 echo "1. Run Massif tool (This takes time)"
 echo "2. Run Cachegrind tool"
+echo "3. Run both the tools (May take sometime)"
 read choice
 
 ./temp "${arguments[@]}" > prog_out 2> prof
 
 if [ $choice == 1 ]
 then
-    echo "h"
-    # valgrind --tool=massif --stacks=yes --time-unit=ms --log-file="valgrind_log" ./temp "${@:2}" > /dev/null 2> /dev/null
-    # ms_print massif.out.* > massif_log
+    valgrind --tool=massif --stacks=yes --time-unit=ms --log-file="valgrind_log" ./temp "${arguments[@]}" > /dev/null 2> /dev/null
+    ms_print massif.out.* > massif_log
+elif [ $choice == 2 ]
+then
+    valgrind --tool=callgrind --simulate-cache=yes --separate-threads=yes --log-file="valgrind_log" ./temp "${arguments[@]}" > /dev/null 2> /dev/null
+    for c in `ls callgrind.out.*-*`
+    do
+        callgrind_annotate --auto=yes "$c" > "callgrind_log-$c"
+    done
+    x=`ls callgrind_log-*`
 else
-    valgrind --tool=callgrind --simulate-cache=yes --log-file="valgrind_log" ./temp "${@:2}" > /dev/null 2> /dev/null
-    callgrind_annotate --auto=yes callgrind.out.* >callgrind_log
+    valgrind --tool=massif --stacks=yes --time-unit=ms --log-file="valgrind_log" ./temp "${arguments[@]}" > /dev/null 2> /dev/null
+    ms_print massif.out.* > massif_log
+    valgrind --tool=callgrind --simulate-cache=yes --separate-threads=yes --log-file="valgrind_log" ./temp "${arguments[@]}" > /dev/null 2> /dev/null
+    for c in `ls callgrind.out.*-*`
+    do
+        callgrind_annotate --auto=yes "$c" > "callgrind_log-$c"
+    done
+    x=`ls callgrind_log-*`
 fi
 
+
 cd ..
-python3 visualization/main.py
-echo "Done profiling the program. You can have a look at the visualizations in the output folder"
+python3 visualization/main.py ${x[@]}
+echo "Done profiling the program. The program output is in build/prog_out"
+echo "You can have a look at the profiling information in the output folder"

@@ -52,33 +52,34 @@ class Profile_parser:
         massif_file.close()
         massif_dump.close()
 
-    def cache_parse(self, cache_file):
-        lines = cache_file.readlines()
-        reached = False
-        count = 0
-        for line in lines:
-            if (reached == False):
-                if (line[:4]=="----"):
-                    reached = True
-            else:
-                line.strip()
-            
-                if "PROGRAM TOTALS" in line or "build/temp" in line: 
-                    values = line.split()
-                    key = values[9]+values[10][:-2] if "PROGRAM" in values[9] else values[9][4:]
-                    f = lambda x: 0 if x == "." else int(x.replace(',',''))
-                    self.cache_info[key] = {
-                                                    "Instructions": f(values[0]),
-                                                    "DataRead": f(values[1]),
-                                                    "DataWrite": f(values[2]),
-                                                    "InstructionMissL1": f(values[3]),
-                                                    "DataReadMissL1": f(values[4]),
-                                                    "DataWriteMissL1": f(values[5]),
-                                                    "InstructionMissL2": f(values[6]),
-                                                    "DataReadMissL2": f(values[7]),
-                                                    "DataWriteMissL2": f(values[8])  
-                                                    }
-        cache_dump = open("build/cache_dump.json", "w")
-        json.dump(self.cache_info, cache_dump)
-        cache_file.close()
-        cache_dump.close()
+    def cache_parse(self, cache_files):
+        for ind,cache_file in enumerate(cache_files):
+            lines = cache_file.readlines()
+            reached = False
+            count = 0
+            for line in lines:
+                if (reached == False):
+                    if (line[:4]=="----"):
+                        reached = True
+                else:
+                    line.strip()
+                
+                    if "PROGRAM TOTALS" in line or "build/temp" in line: 
+                        values = line.split()
+                        key = values[9]+values[10][:-2] if "PROGRAM" in values[9] else values[9][4:]
+                        f = lambda x: 0 if x == "." else int(x.replace(',',''))
+                        self.cache_info[key] = {
+                                                        "Instructions": f(values[0]),
+                                                        "DataRead": f(values[1]),
+                                                        "DataWrite": f(values[2]),
+                                                        "InstructionMissL1": f(values[3]),
+                                                        "DataReadMissL1": f(values[4]),
+                                                        "DataWriteMissL1": f(values[5]),
+                                                        "InstructionMissL2": f(values[6]),
+                                                        "DataReadMissL2": f(values[7]),
+                                                        "DataWriteMissL2": f(values[8])  
+                                                        }
+            cache_dump = open("build/cache_dump-"+str(ind)+".json", "w")
+            json.dump(self.cache_info, cache_dump)
+            cache_file.close()
+            cache_dump.close()
